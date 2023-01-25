@@ -1,0 +1,15 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <form action="@Model.PostUrl" method="post">
+        <input type="hidden" name="env_key" value="@Model.EnvKey">
+        <input type="hidden" name="data" value="@Model.Data">
+
+        <input type="submit" value="Make Payment">
+    </form>
+</div>
