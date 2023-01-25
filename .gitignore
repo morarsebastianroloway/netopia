@@ -349,9 +349,3 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 /appsettings.Development.json
-/Resources/sandbox.CQGA-T555-7N6S-BK4S-VQJDprivate.key
-/Resources/sandbox.CQGA-T555-7N6S-BK4S-VQJD.public.cer
-/Resources/sandbox.2KOI-U7NB-10Q9-ZOBR-1X8A.public.cer
-/Resources/sandbox.2KOI-U7NB-10Q9-ZOBR-1X8A.private.key
-/Resources/live.2KOI-U7NB-10Q9-ZOBR-1X8Aprivate.key
-/Resources/live.2KOI-U7NB-10Q9-ZOBR-1X8A.public.cer
