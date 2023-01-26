@@ -2,17 +2,22 @@
 using MobilpayEncryptDecrypt;
 using Netopia.Logic.Test;
 using Microsoft.Extensions.Options;
+using Netopia.Pages;
 
 namespace Netopia.Logic
 {
     public class PaymentProcessor : IPaymentProcessor
     {
+        private readonly ILogger<IndexModel> _logger;
         private readonly PaymentConfiguration _paymentConfiguration;
         private readonly IWebHostEnvironment _hostingEnvironment;
 
-        public PaymentProcessor(IOptions<PaymentConfiguration> paymentConfigurationOption,
+        public PaymentProcessor(
+            ILogger<IndexModel> logger,
+            IOptions<PaymentConfiguration> paymentConfigurationOption,
             IWebHostEnvironment hostingEnvironment)
         {
+            _logger = logger;
             _paymentConfiguration = paymentConfigurationOption.Value;
             _hostingEnvironment = hostingEnvironment;
         }
@@ -88,6 +93,68 @@ namespace Netopia.Logic
 
 
             return encrypt;
+        }
+
+        public PaymentResult ConfirmPayment(string data, string env_key)
+        {
+            PaymentResult result = new PaymentResult();
+            try
+            {
+                var contentRootPath = _hostingEnvironment.ContentRootPath.AddBackslash();
+                var keypath = Path.GetFullPath(Path.Combine(contentRootPath, _paymentConfiguration.PathToPrivateKey));
+
+                MobilpayEncryptDecrypt.MobilpayEncryptDecrypt encdecrypt = new MobilpayEncryptDecrypt.MobilpayEncryptDecrypt();
+                MobilpayDecrypt decrypt = new MobilpayDecrypt();
+                decrypt.Data = data;
+                decrypt.EnvelopeKey = env_key;
+                decrypt.PrivateKeyFilePath = keypath;
+
+                encdecrypt.Decrypt(decrypt);
+                Mobilpay_Payment_Request_Card card = new Mobilpay_Payment_Request_Card();
+                card = encdecrypt.GetCard(decrypt.DecryptedData);
+
+                var panMasked = card.Confirm.PanMasked;
+                // m_UserToken = card.Confirm.TokenId;
+                _logger.LogInformation($"User token retrieved: {string.IsNullOrEmpty(card.Confirm.TokenId)}");
+                var tokenExpirationDate = card.Confirm.TokenExpirationDate;
+
+                _logger.LogInformation($"Transaction status: {card.Confirm.Action}");
+
+                // TODO: Update payment status in database
+                switch (card.Confirm.Action)
+                {
+                    case "confirmed"://plata efectuata
+                    case "paid": //bani blocati 
+                        {
+                            decimal paidAmount = card.Confirm.Original_Amount;
+                            result.ErrorMessage = card.Confirm.Crc;
+                            if (card.Confirm.Action == "confirmed" && card.Confirm.Error.Code == "0")
+                            {
+                                //var invoice = m_Repository.All<Invoice>().Where(i => i.Id == nMessage.InvoiceId).First();
+                                //if (!invoice.IsPaid)
+                                //{
+                                //    m_NetopiaSystem.RecordInvoicePayment(invoice.Id, paidAmount);
+                                //}
+                            }
+                            break;
+                        }
+                    default:
+                        {
+                            result.ErrorType = "0x02";
+                            result.ErrorCode = "0x300000f6";
+                            result.ErrorMessage = "mobilpay_refference_action paramaters is invalid";
+                            break;
+                        }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unable to parse data");
+                result.ErrorType = "2"; // 2:Permanent Error, 1:Temporary Error (IPN will retry)
+                result.ErrorMessage = ex.Message;
+            }
+
+            return result;
         }
 
         private string GetPathToCertificate()
