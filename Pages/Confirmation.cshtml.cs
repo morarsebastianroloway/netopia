@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Netopia.Pages
 {
+    [IgnoreAntiforgeryToken(Order = 1001)]
     public class ConfirmationModel : PageModel
     {
         private readonly ILogger<IndexModel> _logger;
@@ -20,7 +21,8 @@ namespace Netopia.Pages
         public void OnPostAsync(IFormCollection formData)
         {
             _logger.LogInformation("POST Confirmation was called");
-            _logger.LogInformation("Form data {0}", formData.ToList().ToString());
+            _logger.LogInformation("Data: {0}", formData["data"]);
+            _logger.LogInformation("Env_key: {0}", formData["env_key"]);
         }
     }
 }
