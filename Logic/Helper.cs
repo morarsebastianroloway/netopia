@@ -51,7 +51,7 @@ namespace Netopia.Logic
             return path + separator1;
         }
 
-        static byte[] dataToBeEncrypted;
+        //static byte[] dataToBeEncrypted;
 
         /// <summary>
         /// Inlocuitor pentru Encrypt cu RSACryptoServiceProvider 
@@ -64,7 +64,7 @@ namespace Netopia.Logic
             try
             {
                 byte[] bytes = Encoding.ASCII.GetBytes(mobilpayEncrypt.Data);
-                dataToBeEncrypted = bytes;
+                //dataToBeEncrypted = bytes;
                 Random random = new Random();
                 byte[] array = new byte[8];
                 for (int i = 0; i < array.Length; i++)

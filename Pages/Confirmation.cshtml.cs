@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using MobilpayEncryptDecrypt;
 using Netopia.Logic;
+using Netopia.Logic.Test;
 
 namespace Netopia.Pages
 {
@@ -27,7 +29,7 @@ namespace Netopia.Pages
             _logger.LogInformation("Data: {0}", formData["data"]);
             _logger.LogInformation("Env_key: {0}", formData["env_key"]);
 
-            // We are receiving the data from Netopia by this server-to-server call. We should encrypt and parse the
+            // We are receiving the data from Netopia by this server-to-server call. We should dencrypt and parse the
             // message and update the status in our database, so when the user is redirected to ReturnUrl we know to
             // show him the success or failure message (or pending, if this ConfirmUrl was not called).
 
@@ -40,7 +42,7 @@ namespace Netopia.Pages
             Response.ContentType = "text/xml";
             message = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
             if (result.ErrorCode == "0")
-            {
+            {   
                 message = message + "<crc>" + result.ErrorMessage + "</crc>";
             }
             else
